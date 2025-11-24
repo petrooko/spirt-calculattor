@@ -7,8 +7,8 @@
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #ffffff;
-    color: #1c1c1e;
+    background: #1c1c1e;
+    color: #f5f5f7;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,10 +16,10 @@ body {
     margin: 0;
 }
 .container {
-    background: #f0f0f0;
+    background: #2c2c2e;
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -32,10 +32,10 @@ input {
     padding: 15px;
     margin: 12px 0;
     border-radius: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #444;
     font-size: 20px;
-    background: #ffffff;
-    color: #1c1c1e;
+    background: #1c1c1e;
+    color: #f5f5f7;
 }
 button {
     width: 95%;
@@ -54,9 +54,9 @@ button:hover {
 }
 .result {
     margin-top: 25px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
-    min-height: 150px;
+    min-height: 120px;
     line-height: 1.5;
 }
 </style>
@@ -64,8 +64,8 @@ button:hover {
 <body>
 <div class="container">
     <h1>Калькулятор браги</h1>
-    <input id="OG" type="number" step="0.1" min="0.1" placeholder="OG (%) АЦ-2 (наприклад 15,2)" inputmode="decimal">
-    <input id="FG" type="number" step="0.1" min="0" placeholder="FG (%) АЦ-2 (наприклад 1,2)" inputmode="decimal">
+    <input id="OG" type="number" step="0.1" min="0.1" placeholder="OG (%) АЦ-2" inputmode="decimal">
+    <input id="FG" type="number" step="0.1" min="0" placeholder="FG (%) АЦ-2" inputmode="decimal">
     <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
     <button onclick="calculate()">Розрахувати</button>
     <div class="result" id="result"></div>
@@ -102,10 +102,8 @@ function calculate() {
     const S43 = abs / 0.43;
 
     resultDiv.innerHTML = `
-        OG (SG): ${OG.toFixed(4)}<br>
-        FG (SG): ${FG.toFixed(4)}<br>
         ABV браги: ${ABV.toFixed(3)}%<br>
-        Абсолютний спирт: ${abs.toFixed(4)} л<br>
+        Абсолютний спирт: ${abs.toFixed(3)} л<br>
         Сирець 40%: ${S40.toFixed(3)} л<br>
         Сирець 43%: ${S43.toFixed(3)} л
     `;
