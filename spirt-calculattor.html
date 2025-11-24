@@ -63,8 +63,8 @@ button:hover {
 <body>
 <div class="container">
     <h1>Калькулятор браги</h1>
-    <input id="OG" type="number" step="0.001" min="1.000" placeholder="OG (початкова густина)" inputmode="decimal">
-    <input id="FG" type="number" step="0.001" min="0.990" placeholder="FG (кінцева густина)" inputmode="decimal">
+    <input id="OG" type="number" step="1" min="1000" placeholder="OG (наприклад 1080)" inputmode="decimal">
+    <input id="FG" type="number" step="1" min="990" placeholder="FG (наприклад 1020)" inputmode="decimal">
     <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
     <button onclick="calculate()">Розрахувати</button>
     <div class="result" id="result"></div>
@@ -72,9 +72,9 @@ button:hover {
 
 <script>
 function calculate() {
-    const OG = parseFloat(document.getElementById('OG').value);
-    const FG = parseFloat(document.getElementById('FG').value);
-    const V = parseFloat(document.getElementById('V').value);
+    let OG = parseFloat(document.getElementById('OG').value);
+    let FG = parseFloat(document.getElementById('FG').value);
+    let V = parseFloat(document.getElementById('V').value);
     const resultDiv = document.getElementById('result');
 
     if (!OG || !FG || !V) {
@@ -85,6 +85,10 @@ function calculate() {
         resultDiv.innerHTML = "OG повинна бути більшою за FG!";
         return;
     }
+
+    // Перетворюємо OG/FG у формат 1.xxx, якщо введено 1080/1020
+    if (OG > 2) OG = OG / 1000;
+    if (FG > 2) FG = FG / 1000;
 
     // ABV (%)
     const ABV = (OG - FG) * 131.25;
