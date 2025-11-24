@@ -54,17 +54,18 @@ button:hover {
 }
 .result {
     margin-top: 25px;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
-    min-height: 100px;
+    min-height: 150px;
+    line-height: 1.5;
 }
 </style>
 </head>
 <body>
 <div class="container">
     <h1>Калькулятор браги</h1>
-    <input id="OG" type="number" step="1" min="1000" placeholder="OG (наприклад 1080)" inputmode="decimal">
-    <input id="FG" type="number" step="1" min="990" placeholder="FG (наприклад 1020)" inputmode="decimal">
+    <input id="OG" type="number" step="0.1" min="0.1" placeholder="OG (%) АЦ-2 (наприклад 15,2)" inputmode="decimal">
+    <input id="FG" type="number" step="0.1" min="0" placeholder="FG (%) АЦ-2 (наприклад 1,2)" inputmode="decimal">
     <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
     <button onclick="calculate()">Розрахувати</button>
     <div class="result" id="result"></div>
@@ -72,35 +73,41 @@ button:hover {
 
 <script>
 function calculate() {
-    let OG = parseFloat(document.getElementById('OG').value);
-    let FG = parseFloat(document.getElementById('FG').value);
+    let OG_percent = parseFloat(document.getElementById('OG').value);
+    let FG_percent = parseFloat(document.getElementById('FG').value);
     let V = parseFloat(document.getElementById('V').value);
     const resultDiv = document.getElementById('result');
 
-    if (!OG || !FG || !V) {
+    if (!OG_percent || !FG_percent || !V) {
         resultDiv.innerHTML = "Заповніть всі поля!";
         return;
     }
-    if (OG <= FG) {
+    if (OG_percent <= FG_percent) {
         resultDiv.innerHTML = "OG повинна бути більшою за FG!";
         return;
     }
 
-    // Перетворюємо OG/FG у формат 1.xxx, якщо введено 1080/1020
-    if (OG > 2) OG = OG / 1000;
-    if (FG > 2) FG = FG / 1000;
+    // Перетворюємо АЦ-2 (%) у SG
+    const OG = 1 + OG_percent / 258;
+    const FG = 1 + FG_percent / 258;
 
     // ABV (%)
     const ABV = (OG - FG) * 131.25;
 
+    // Абсолютний спирт (л)
+    const abs = V * ABV / 100;
+
     // Сирець 40% та 43%
-    const S40 = V * ABV / 40;
-    const S43 = V * ABV / 43;
+    const S40 = abs / 0.4;
+    const S43 = abs / 0.43;
 
     resultDiv.innerHTML = `
-        ABV браги: ${ABV.toFixed(2)}%<br>
-        Сирець 40%: ${S40.toFixed(2)} л<br>
-        Сирець 43%: ${S43.toFixed(2)} л
+        OG (SG): ${OG.toFixed(4)}<br>
+        FG (SG): ${FG.toFixed(4)}<br>
+        ABV браги: ${ABV.toFixed(3)}%<br>
+        Абсолютний спирт: ${abs.toFixed(4)} л<br>
+        Сирець 40%: ${S40.toFixed(3)} л<br>
+        Сирець 43%: ${S43.toFixed(3)} л
     `;
 }
 </script>
