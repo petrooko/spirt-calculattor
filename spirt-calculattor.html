@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор браги</title>
+<title>Калькулятор браги (світла версія)</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" sizes="512x512" href="https://i.imgur.com/7R5K3Qf.png">
 
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #1c1c1e;
-    color: #f5f5f7;
+    background: #ffffff;
+    color: #1c1c1e;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,10 +20,10 @@ body {
     margin: 0;
 }
 .container {
-    background: #2c2c2e;
+    background: #f0f0f0;
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.2);
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -36,10 +36,10 @@ input {
     padding: 15px;
     margin: 12px 0;
     border-radius: 12px;
-    border: 1px solid #444;
+    border: 1px solid #ccc;
     font-size: 20px;
-    background: #1c1c1e;
-    color: #f5f5f7;
+    background: #ffffff;
+    color: #1c1c1e;
 }
 button {
     width: 95%;
@@ -62,6 +62,7 @@ button:hover {
     font-weight: bold;
     min-height: 180px;
     line-height: 1.5;
+    color: #1c1c1e;
 }
 </style>
 </head>
@@ -91,7 +92,6 @@ function animateNumber(element, label, target, delay = 0, duration = 800) {
         const timer = setInterval(() => {
             currentStep++;
             start += increment;
-            // додаємо <br> для нового рядка
             element.innerHTML += `${label}: ${start.toFixed(2)}<br>`;
             if (currentStep >= stepCount) {
                 element.innerHTML += `${label}: ${target.toFixed(2)}<br>`;
@@ -116,21 +116,13 @@ function calculate() {
         return;
     }
 
-    // Розрахунок ABV
     const ABV = (OG - FG) * 131.25;
-
-    // Сирець
     const S40 = V * ABV / 40;
     const S43 = V * ABV / 43;
-
-    // Міцність сирцю після перегонки
     const Strength40 = ABV * V / S40;
     const Strength43 = ABV * V / S43;
 
-    // Очищаємо результат перед анімацією
     resultDiv.innerHTML = "";
-
-    // Анімація
     animateNumber(resultDiv, "ABV (%)", ABV, 100);
     animateNumber(resultDiv, "Сирець 40% (л)", S40, 600);
     animateNumber(resultDiv, "Сирець 43% (л)", S43, 1100);
