@@ -19,7 +19,7 @@ body {
     background: #2c2c2e;
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.5);
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -36,28 +36,51 @@ input {
     font-size: 20px;
     background: #1c1c1e;
     color: #f5f5f7;
+    transition: box-shadow 0.3s, border-color 0.3s;
+}
+input:focus {
+    border-color: #0a84ff;
+    box-shadow: 0 0 8px rgba(10,132,255,0.5);
+    outline: none;
 }
 button {
     width: 95%;
     padding: 18px;
-    background: #0a84ff;
+    background: linear-gradient(135deg, #0a84ff, #5ac8fa);
     color: #fff;
     border: none;
     border-radius: 15px;
     font-size: 20px;
     margin-top: 15px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s;
 }
 button:hover {
-    background: #0066cc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
 }
-.result {
-    margin-top: 25px;
-    font-size: 20px;
+.result-block {
+    background: #29292c;
+    border-radius: 14px;
+    padding: 12px 20px;
+    margin: 10px 0;
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+.result-block.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.result-label {
+    font-weight: 500;
+}
+.result-value {
+    font-family: monospace;
     font-weight: bold;
-    min-height: 120px;
-    line-height: 1.5;
 }
 </style>
 </head>
@@ -68,22 +91,43 @@ button:hover {
     <input id="FG" type="number" step="0.1" min="0" placeholder="FG (%) АЦ-2" inputmode="decimal">
     <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
     <button onclick="calculate()">Розрахувати</button>
-    <div class="result" id="result"></div>
+    <div id="result"></div>
 </div>
 
 <script>
-function calculate() {
-    let OG_percent = parseFloat(document.getElementById('OG').value);
-    let FG_percent = parseFloat(document.getElementById('FG').value);
-    let V = parseFloat(document.getElementById('V').value);
+function animateNumber(element, value, duration = 800) {
+    let start = 0;
+    const stepTime = 16;
+    const steps = Math.ceil(duration / stepTime);
+    const increment = value / steps;
+    let currentStep = 0;
+    return new Promise(resolve => {
+        const timer = setInterval(() => {
+            currentStep++;
+            start += increment;
+            element.textContent = start.toFixed(3);
+            if (currentStep >= steps) {
+                element.textContent = value.toFixed(3);
+                clearInterval(timer);
+                resolve();
+            }
+        }, stepTime);
+    });
+}
+
+async function calculate() {
+    const OG_percent = parseFloat(document.getElementById('OG').value);
+    const FG_percent = parseFloat(document.getElementById('FG').value);
+    const V = parseFloat(document.getElementById('V').value);
     const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
 
     if (!OG_percent || !FG_percent || !V) {
-        resultDiv.innerHTML = "Заповніть всі поля!";
+        resultDiv.innerHTML = "<div class='result-block show'>Заповніть всі поля!</div>";
         return;
     }
     if (OG_percent <= FG_percent) {
-        resultDiv.innerHTML = "OG повинна бути більшою за FG!";
+        resultDiv.innerHTML = "<div class='result-block show'>OG повинна бути більшою за FG!</div>";
         return;
     }
 
@@ -101,12 +145,23 @@ function calculate() {
     const S40 = abs / 0.4;
     const S43 = abs / 0.43;
 
-    resultDiv.innerHTML = `
-        ABV браги: ${ABV.toFixed(3)}%<br>
-        Абсолютний спирт: ${abs.toFixed(3)} л<br>
-        Сирець 40%: ${S40.toFixed(3)} л<br>
-        Сирець 43%: ${S43.toFixed(3)} л
-    `;
+    const results = [
+        {label: 'ABV браги (%)', value: ABV},
+        {label: 'Абсолютний спирт (л)', value: abs},
+        {label: 'Сирець 40% (л)', value: S40},
+        {label: 'Сирець 43% (л)', value: S43}
+    ];
+
+    for (let r of results) {
+        const block = document.createElement('div');
+        block.className = 'result-block';
+        block.innerHTML = `<span class="result-label">${r.label}</span><span class="result-value">0.000</span>`;
+        resultDiv.appendChild(block);
+        await new Promise(resolve => setTimeout(resolve, 100)); // затримка для появи
+        block.classList.add('show');
+        const valueElement = block.querySelector('.result-value');
+        await animateNumber(valueElement, r.value);
+    }
 }
 </script>
 </body>
