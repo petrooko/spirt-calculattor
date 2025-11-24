@@ -3,11 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор браги (світла версія)</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" sizes="512x512" href="https://i.imgur.com/7R5K3Qf.png">
-
+<title>Калькулятор браги</title>
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,7 +19,7 @@ body {
     background: #f0f0f0;
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -60,47 +56,21 @@ button:hover {
     margin-top: 25px;
     font-size: 20px;
     font-weight: bold;
-    min-height: 180px;
-    line-height: 1.5;
-    color: #1c1c1e;
+    min-height: 100px;
 }
 </style>
 </head>
-
 <body>
 <div class="container">
     <h1>Калькулятор браги</h1>
-
     <input id="OG" type="number" step="0.001" min="1.000" placeholder="OG (початкова густина)" inputmode="decimal">
     <input id="FG" type="number" step="0.001" min="0.990" placeholder="FG (кінцева густина)" inputmode="decimal">
     <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
-
     <button onclick="calculate()">Розрахувати</button>
-
     <div class="result" id="result"></div>
 </div>
 
 <script>
-function animateNumber(element, label, target, delay = 0, duration = 800) {
-    setTimeout(() => {
-        let start = 0;
-        const stepTime = 16;
-        const stepCount = Math.ceil(duration / stepTime);
-        const increment = (target - start) / stepCount;
-        let currentStep = 0;
-
-        const timer = setInterval(() => {
-            currentStep++;
-            start += increment;
-            element.innerHTML += `${label}: ${start.toFixed(2)}<br>`;
-            if (currentStep >= stepCount) {
-                element.innerHTML += `${label}: ${target.toFixed(2)}<br>`;
-                clearInterval(timer);
-            }
-        }, stepTime);
-    }, delay);
-}
-
 function calculate() {
     const OG = parseFloat(document.getElementById('OG').value);
     const FG = parseFloat(document.getElementById('FG').value);
@@ -108,7 +78,7 @@ function calculate() {
     const resultDiv = document.getElementById('result');
 
     if (!OG || !FG || !V) {
-        resultDiv.innerHTML = "Заповни всі поля!";
+        resultDiv.innerHTML = "Заповніть всі поля!";
         return;
     }
     if (OG <= FG) {
@@ -116,18 +86,18 @@ function calculate() {
         return;
     }
 
+    // ABV (%)
     const ABV = (OG - FG) * 131.25;
+
+    // Сирець 40% та 43%
     const S40 = V * ABV / 40;
     const S43 = V * ABV / 43;
-    const Strength40 = ABV * V / S40;
-    const Strength43 = ABV * V / S43;
 
-    resultDiv.innerHTML = "";
-    animateNumber(resultDiv, "ABV (%)", ABV, 100);
-    animateNumber(resultDiv, "Сирець 40% (л)", S40, 600);
-    animateNumber(resultDiv, "Сирець 43% (л)", S43, 1100);
-    animateNumber(resultDiv, "Міцність після 40%", Strength40, 1600);
-    animateNumber(resultDiv, "Міцність після 43%", Strength43, 2100);
+    resultDiv.innerHTML = `
+        ABV браги: ${ABV.toFixed(2)}%<br>
+        Сирець 40%: ${S40.toFixed(2)} л<br>
+        Сирець 43%: ${S43.toFixed(2)} л
+    `;
 }
 </script>
 </body>
