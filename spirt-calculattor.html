@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Калькулятор браги</title>
+
+<!-- Іконка для домашнього екрану -->
+<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
+<link rel="icon" href="icon.png">
+
+<!-- Мета-теги для повноекранного режиму -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Калькулятор браги">
+<meta name="mobile-web-app-capable" content="yes">
+
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -157,7 +168,7 @@ async function calculate() {
         block.className = 'result-block';
         block.innerHTML = `<span class="result-label">${r.label}</span><span class="result-value">0.000</span>`;
         resultDiv.appendChild(block);
-        await new Promise(resolve => setTimeout(resolve, 100)); // затримка для появи
+        await new Promise(resolve => setTimeout(resolve, 100));
         block.classList.add('show');
         const valueElement = block.querySelector('.result-value');
         await animateNumber(valueElement, r.value);
