@@ -60,7 +60,8 @@ button:hover {
     margin-top: 25px;
     font-size: 20px;
     font-weight: bold;
-    min-height: 100px;
+    min-height: 180px;
+    line-height: 1.5;
 }
 </style>
 </head>
@@ -79,22 +80,25 @@ button:hover {
 </div>
 
 <script>
-function animateNumber(element, label, target, duration = 800) {
-    let start = 0;
-    const stepTime = 16; 
-    const stepCount = Math.ceil(duration / stepTime);
-    const increment = (target - start) / stepCount;
-    let currentStep = 0;
+function animateNumber(element, label, target, delay = 0, duration = 800) {
+    setTimeout(() => {
+        let start = 0;
+        const stepTime = 16;
+        const stepCount = Math.ceil(duration / stepTime);
+        const increment = (target - start) / stepCount;
+        let currentStep = 0;
 
-    const timer = setInterval(() => {
-        currentStep++;
-        start += increment;
-        element.innerHTML = `${label}: ${start.toFixed(2)}`;
-        if (currentStep >= stepCount) {
-            element.innerHTML = `${label}: ${target.toFixed(2)}`;
-            clearInterval(timer);
-        }
-    }, stepTime);
+        const timer = setInterval(() => {
+            currentStep++;
+            start += increment;
+            // додаємо <br> для нового рядка
+            element.innerHTML += `${label}: ${start.toFixed(2)}<br>`;
+            if (currentStep >= stepCount) {
+                element.innerHTML += `${label}: ${target.toFixed(2)}<br>`;
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }, delay);
 }
 
 function calculate() {
@@ -119,11 +123,19 @@ function calculate() {
     const S40 = V * ABV / 40;
     const S43 = V * ABV / 43;
 
-    // Плавна анімація результатів
+    // Міцність сирцю після перегонки
+    const Strength40 = ABV * V / S40;
+    const Strength43 = ABV * V / S43;
+
+    // Очищаємо результат перед анімацією
     resultDiv.innerHTML = "";
-    setTimeout(() => animateNumber(resultDiv, "ABV (%)", ABV), 100);
-    setTimeout(() => animateNumber(resultDiv, "Сирець 40% (л)", S40), 600);
-    setTimeout(() => animateNumber(resultDiv, "Сирець 43% (л)", S43), 1100);
+
+    // Анімація
+    animateNumber(resultDiv, "ABV (%)", ABV, 100);
+    animateNumber(resultDiv, "Сирець 40% (л)", S40, 600);
+    animateNumber(resultDiv, "Сирець 43% (л)", S43, 1100);
+    animateNumber(resultDiv, "Міцність після 40%", Strength40, 1600);
+    animateNumber(resultDiv, "Міцність після 43%", Strength43, 2100);
 }
 </script>
 </body>
