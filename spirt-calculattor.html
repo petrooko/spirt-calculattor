@@ -3,68 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор розбавлення спирту</title>
-
-<!-- Іконка для Home Screen -->
+<title>Калькулятор браги</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" sizes="512x512" href="https://i.imgur.com/7R5K3Qf.png">
 
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    padding: 20px;
     background: #1c1c1e;
     color: #f5f5f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
-h2 { text-align: center; }
-.box {
+.container {
     background: #2c2c2e;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    max-width: 380px;
-    margin: 0 auto;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+h1 {
+    margin-bottom: 20px;
 }
 input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 10px;
+    width: 90%;
+    padding: 15px;
+    margin: 12px 0;
+    border-radius: 12px;
     border: 1px solid #444;
-    font-size: 18px;
+    font-size: 20px;
     background: #1c1c1e;
     color: #f5f5f7;
 }
 button {
-    width: 100%;
-    padding: 15px;
+    width: 95%;
+    padding: 18px;
     background: #0a84ff;
-    color: white;
+    color: #fff;
     border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    margin-top: 10px;
+    border-radius: 15px;
+    font-size: 20px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+button:hover {
+    background: #0066cc;
 }
 .result {
-    margin-top: 20px;
+    margin-top: 25px;
     font-size: 20px;
     font-weight: bold;
-    text-align: center;
+    min-height: 100px;
 }
 </style>
 </head>
 
 <body>
-<h2>Калькулятор розбавлення спирту</h2>
+<div class="container">
+    <h1>Калькулятор браги</h1>
 
-<div class="box">
-    <label>Початкова міцність (%)</label>
-    <input id="A" type="number" step="0.1">
-
-    <label>Бажана міцність (%)</label>
-    <input id="B" type="number" step="0.1">
-
-    <label>Обʼєм спирту (л)</label>
-    <input id="V" type="number" step="0.01">
+    <input id="OG" type="number" step="0.001" min="1.000" placeholder="OG (початкова густина)" inputmode="decimal">
+    <input id="FG" type="number" step="0.001" min="0.990" placeholder="FG (кінцева густина)" inputmode="decimal">
+    <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
 
     <button onclick="calculate()">Розрахувати</button>
 
@@ -72,20 +79,52 @@ button {
 </div>
 
 <script>
-function calculate() {
-    let A = parseFloat(document.getElementById('A').value);
-    let B = parseFloat(document.getElementById('B').value);
-    let V = parseFloat(document.getElementById('V').value);
+function animateNumber(element, label, target, duration = 800) {
+    let start = 0;
+    const stepTime = 16; 
+    const stepCount = Math.ceil(duration / stepTime);
+    const increment = (target - start) / stepCount;
+    let currentStep = 0;
 
-    if (A > 0 && B > 0 && V > 0) {
-        let water = V * (A / B - 1);
-        document.getElementById('result').innerHTML =
-            "Потрібно додати: <br><span style='font-size:26px;'>" + water.toFixed(3) + " л води</span>";
-    } else {
-        document.getElementById('result').innerHTML = "Заповни всі поля!";
+    const timer = setInterval(() => {
+        currentStep++;
+        start += increment;
+        element.innerHTML = `${label}: ${start.toFixed(2)}`;
+        if (currentStep >= stepCount) {
+            element.innerHTML = `${label}: ${target.toFixed(2)}`;
+            clearInterval(timer);
+        }
+    }, stepTime);
+}
+
+function calculate() {
+    const OG = parseFloat(document.getElementById('OG').value);
+    const FG = parseFloat(document.getElementById('FG').value);
+    const V = parseFloat(document.getElementById('V').value);
+    const resultDiv = document.getElementById('result');
+
+    if (!OG || !FG || !V) {
+        resultDiv.innerHTML = "Заповни всі поля!";
+        return;
     }
+    if (OG <= FG) {
+        resultDiv.innerHTML = "OG повинна бути більшою за FG!";
+        return;
+    }
+
+    // Розрахунок ABV
+    const ABV = (OG - FG) * 131.25;
+
+    // Сирець
+    const S40 = V * ABV / 40;
+    const S43 = V * ABV / 43;
+
+    // Плавна анімація результатів
+    resultDiv.innerHTML = "";
+    setTimeout(() => animateNumber(resultDiv, "ABV (%)", ABV), 100);
+    setTimeout(() => animateNumber(resultDiv, "Сирець 40% (л)", S40), 600);
+    setTimeout(() => animateNumber(resultDiv, "Сирець 43% (л)", S43), 1100);
 }
 </script>
 </body>
 </html>
-
