@@ -3,17 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор браги</title>
-
-<!-- Іконка для домашнього екрану -->
-<link rel="apple-touch-icon" sizes="512x512" href="icon.png">
-<link rel="icon" href="icon.png">
-
-<!-- Мета-теги для повноекранного режиму -->
+<title>Калькулятор розбавлення спирту</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Калькулятор браги">
-<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" sizes="512x512" href="https://i.imgur.com/7R5K3Qf.png">
 
 <style>
 body {
@@ -47,132 +40,81 @@ input {
     font-size: 20px;
     background: #1c1c1e;
     color: #f5f5f7;
-    transition: box-shadow 0.3s, border-color 0.3s;
-}
-input:focus {
-    border-color: #0a84ff;
-    box-shadow: 0 0 8px rgba(10,132,255,0.5);
-    outline: none;
 }
 button {
     width: 95%;
     padding: 18px;
-    background: linear-gradient(135deg, #0a84ff, #5ac8fa);
+    background: #0a84ff;
     color: #fff;
     border: none;
     border-radius: 15px;
     font-size: 20px;
     margin-top: 15px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: background 0.3s;
 }
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    background: #0066cc;
 }
-.result-block {
-    background: #29292c;
-    border-radius: 14px;
-    padding: 12px 20px;
-    margin: 10px 0;
-    font-size: 18px;
-    display: flex;
-    justify-content: space-between;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease;
-}
-.result-block.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-.result-label {
-    font-weight: 500;
-}
-.result-value {
-    font-family: monospace;
+.result {
+    margin-top: 25px;
+    font-size: 22px;
     font-weight: bold;
+    min-height: 60px;
 }
 </style>
 </head>
+
 <body>
 <div class="container">
-    <h1>Калькулятор браги</h1>
-    <input id="OG" type="number" step="0.1" min="0.1" placeholder="OG (%) АЦ-2" inputmode="decimal">
-    <input id="FG" type="number" step="0.1" min="0" placeholder="FG (%) АЦ-2" inputmode="decimal">
-    <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм браги (л)" inputmode="decimal">
+    <h1>Калькулятор розбавлення спирту</h1>
+
+    <input id="A" type="number" step="0.1" min="0.1" placeholder="Початкова міцність (%)" inputmode="decimal">
+    <input id="B" type="number" step="0.1" min="0.1" placeholder="Бажана міцність (%)" inputmode="decimal">
+    <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм спирту (л)" inputmode="decimal">
+
     <button onclick="calculate()">Розрахувати</button>
-    <div id="result"></div>
+
+    <div class="result" id="result"></div>
 </div>
 
 <script>
-function animateNumber(element, value, duration = 800) {
+function animateNumber(element, target, duration = 800) {
     let start = 0;
-    const stepTime = 16;
-    const steps = Math.ceil(duration / stepTime);
-    const increment = value / steps;
+    const stepTime = 16; // приблизно 60 fps
+    const stepCount = Math.ceil(duration / stepTime);
+    const increment = (target - start) / stepCount;
     let currentStep = 0;
-    return new Promise(resolve => {
-        const timer = setInterval(() => {
-            currentStep++;
-            start += increment;
-            element.textContent = start.toFixed(3);
-            if (currentStep >= steps) {
-                element.textContent = value.toFixed(3);
-                clearInterval(timer);
-                resolve();
-            }
-        }, stepTime);
-    });
+
+    const timer = setInterval(() => {
+        currentStep++;
+        start += increment;
+        element.innerHTML = "Потрібно додати: <br><span style='font-size:26px;'>" + start.toFixed(3) + " л води</span>";
+        if (currentStep >= stepCount) {
+            element.innerHTML = "Потрібно додати: <br><span style='font-size:26px;'>" + target.toFixed(3) + " л води</span>";
+            clearInterval(timer);
+        }
+    }, stepTime);
 }
 
-async function calculate() {
-    const OG_percent = parseFloat(document.getElementById('OG').value);
-    const FG_percent = parseFloat(document.getElementById('FG').value);
-    const V = parseFloat(document.getElementById('V').value);
+function calculate() {
+    let A = parseFloat(document.getElementById('A').value);
+    let B = parseFloat(document.getElementById('B').value);
+    let V = parseFloat(document.getElementById('V').value);
     const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = '';
 
-    if (!OG_percent || !FG_percent || !V) {
-        resultDiv.innerHTML = "<div class='result-block show'>Заповніть всі поля!</div>";
-        return;
-    }
-    if (OG_percent <= FG_percent) {
-        resultDiv.innerHTML = "<div class='result-block show'>OG повинна бути більшою за FG!</div>";
+    if (!A || !B || !V) {
+        resultDiv.innerHTML = "Заповни всі поля!";
         return;
     }
 
-    // Перетворюємо АЦ-2 (%) у SG
-    const OG = 1 + OG_percent / 258;
-    const FG = 1 + FG_percent / 258;
-
-    // ABV (%)
-    const ABV = (OG - FG) * 131.25;
-
-    // Абсолютний спирт (л)
-    const abs = V * ABV / 100;
-
-    // Сирець 40% та 43%
-    const S40 = abs / 0.4;
-    const S43 = abs / 0.43;
-
-    const results = [
-        {label: 'ABV браги (%)', value: ABV},
-        {label: 'Абсолютний спирт (л)', value: abs},
-        {label: 'Сирець 40% (л)', value: S40},
-        {label: 'Сирець 43% (л)', value: S43}
-    ];
-
-    for (let r of results) {
-        const block = document.createElement('div');
-        block.className = 'result-block';
-        block.innerHTML = `<span class="result-label">${r.label}</span><span class="result-value">0.000</span>`;
-        resultDiv.appendChild(block);
-        await new Promise(resolve => setTimeout(resolve, 100));
-        block.classList.add('show');
-        const valueElement = block.querySelector('.result-value');
-        await animateNumber(valueElement, r.value);
+    if (B >= A) {
+        resultDiv.innerHTML = "Бажана міцність повинна бути менша за початкову!";
+        return;
     }
+
+    let water = V * (A / B - 1);
+    animateNumber(resultDiv, water);
 }
 </script>
 </body>
