@@ -3,119 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор розбавлення спирту</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" sizes="512x512" href="https://i.imgur.com/7R5K3Qf.png">
-
+<title>Alcohol Calculator</title>
+<link rel="manifest" href="manifest.json">
 <style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #1c1c1e;
-    color: #f5f5f7;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden;font-family:system-ui,sans-serif;transition:.3s;}
+:root{
+  --bg:linear-gradient(120deg,#0f2027,#203a43,#2c5364);
+  --card:rgba(0,0,0,0.35);
+  --text:white;
+  --btn:#00c853;
+  --danger:#ff5252;
+  --panel:rgba(255,255,255,0.12);
 }
-.container {
-    background: #2c2c2e;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.5);
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
+.light{
+  --bg:linear-gradient(120deg,#e0e0e0,#f5f5f5);
+  --card:white;
+  --text:#000;
+  --panel:#ddd;
 }
-h1 {
-    margin-bottom: 20px;
-}
-input {
-    width: 90%;
-    padding: 15px;
-    margin: 12px 0;
-    border-radius: 12px;
-    border: 1px solid #444;
-    font-size: 20px;
-    background: #1c1c1e;
-    color: #f5f5f7;
-}
-button {
-    width: 95%;
-    padding: 18px;
-    background: #0a84ff;
-    color: #fff;
-    border: none;
-    border-radius: 15px;
-    font-size: 20px;
-    margin-top: 15px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-button:hover {
-    background: #0066cc;
-}
-.result {
-    margin-top: 25px;
-    font-size: 22px;
-    font-weight: bold;
-    min-height: 60px;
-}
+body{background:var(--bg);color:var(--text);}
+.app{max-width:600px;margin:auto;padding:15px;}
+header{display:flex;justify-content:space-between;align-items:center;font-size:24px;font-weight:700;margin-bottom:10px;flex-wrap:wrap;}
+.theme, #installBtn{padding:6px 12px;border-radius:10px;background:var(--panel);border:none;margin-top:5px;}
+.tabs{display:flex;background:var(--panel);border-radius:12px;overflow:hidden;}
+.tabs button{flex:1;padding:14px;background:none;border:none;font-size:16px;color:var(--text);}
+.tabs button.active{background:var(--card);}
+.panel{display:none;margin-top:15px;}
+.panel.active{display:block;}
+input, select{width:100%;padding:14px;margin:8px 0;border-radius:12px;border:none;font-size:18px;}
+button.calc{width:100%;background:var(--btn);color:white;font-size:18px;padding:14px;border:none;border-radius:12px;margin-top:8px;}
+button.clear{width:100%;background:var(--danger);color:white;font-size:18px;padding:14px;border:none;border-radius:12px;margin-top:8px;}
+.result{opacity:0;transform:scale(.98);transition:.36s;margin-top:12px;background:var(--card);border-radius:12px;padding:15px;font-size:20px;text-align:center;}
+.result.show{opacity:1;transform:scale(1);}
+.small{font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;}
+@media (max-width:480px){ .app{padding:12px;} input, select{font-size:16px;padding:12px} button.calc,button.clear{padding:12px;font-size:16px} }
 </style>
 </head>
-
 <body>
-<div class="container">
-    <h1>Калькулятор розбавлення спирту</h1>
 
-    <input id="A" type="number" step="0.1" min="0.1" placeholder="Початкова міцність (%)" inputmode="decimal">
-    <input id="B" type="number" step="0.1" min="0.1" placeholder="Бажана міцність (%)" inputmode="decimal">
-    <input id="V" type="number" step="0.01" min="0.01" placeholder="Обʼєм спирту (л)" inputmode="decimal">
+<div class="app">
+<header>
+  Alcohol Calculator
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="theme" onclick="toggleTheme()">🌗 Тема</button>
+    <button id="installBtn" style="display:none;">📲 Додати як додаток</button>
+  </div>
+</header>
 
-    <button onclick="calculate()">Розрахувати</button>
+<div class="tabs">
+  <button class="active" onclick="tab(0)">Вода</button>
+  <button onclick="tab(1)">Аерометр</button>
+  <button onclick="tab(2)">Брага</button>
+</div>
 
-    <div class="result" id="result"></div>
+<!-- ВОДА -->
+<div class="panel active">
+  <input type="number" inputmode="decimal" id="c1" placeholder="Початкова міцність %">
+  <input type="number" inputmode="decimal" id="v1" placeholder="Обʼєм л">
+  <input type="number" inputmode="decimal" id="c2" placeholder="Потрібна міцність %">
+  <button class="calc" onclick="water()">Розрахувати</button>
+  <button class="clear" onclick="clearAll()">Очистити</button>
+  <div class="result" id="rWater"></div>
+</div>
+
+<!-- АЕРОМЕТР -->
+<div class="panel">
+  <select id="aspType">
+    <option value="asp1">АСП-1</option>
+    <option value="asp2">АСП-2</option>
+    <option value="asp3" selected>АСП-3 (20°C)</option>
+  </select>
+
+  <input type="number" inputmode="decimal" id="aVal" placeholder="Показ аерометра %">
+  <input type="number" inputmode="decimal" id="tVal" placeholder="Температура °C">
+
+  <button class="calc" onclick="calcAero()">Розрахувати</button>
+  <button class="clear" onclick="clearAll()">Очистити</button>
+  <div class="result" id="rAero"></div>
+</div>
+
+<!-- БРАГА -->
+<div class="panel">
+  <input type="number" inputmode="decimal" id="og" placeholder="OG (АЦ-2)">
+  <input type="number" inputmode="decimal" id="fg" placeholder="FG (АЦ-2)">
+  <input type="number" inputmode="decimal" id="vol" placeholder="Обʼєм браги л">
+  <div class="small">Формула ABV ≈ (OG − FG) × 0.5083</div>
+  <button class="calc" onclick="braga()">Розрахувати</button>
+  <button class="clear" onclick="clearAll()">Очистити</button>
+  <div class="result" id="rBraga"></div>
+</div>
+
 </div>
 
 <script>
-function animateNumber(element, target, duration = 800) {
-    let start = 0;
-    const stepTime = 16; // приблизно 60 fps
-    const stepCount = Math.ceil(duration / stepTime);
-    const increment = (target - start) / stepCount;
-    let currentStep = 0;
-
-    const timer = setInterval(() => {
-        currentStep++;
-        start += increment;
-        element.innerHTML = "Потрібно додати: <br><span style='font-size:26px;'>" + start.toFixed(3) + " л води</span>";
-        if (currentStep >= stepCount) {
-            element.innerHTML = "Потрібно додати: <br><span style='font-size:26px;'>" + target.toFixed(3) + " л води</span>";
-            clearInterval(timer);
-        }
-    }, stepTime);
+// Tabs
+function tab(n){
+ document.querySelectorAll('.tabs button').forEach((b,i)=>b.classList.toggle("active",i===n));
+ document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle("active",i===n));
 }
 
-function calculate() {
-    let A = parseFloat(document.getElementById('A').value);
-    let B = parseFloat(document.getElementById('B').value);
-    let V = parseFloat(document.getElementById('V').value);
-    const resultDiv = document.getElementById('result');
-
-    if (!A || !B || !V) {
-        resultDiv.innerHTML = "Заповни всі поля!";
-        return;
-    }
-
-    if (B >= A) {
-        resultDiv.innerHTML = "Бажана міцність повинна бути менша за початкову!";
-        return;
-    }
-
-    let water = V * (A / B - 1);
-    animateNumber(resultDiv, water);
+// Fade helper
+function show(el, txt){
+ el.classList.remove("show");
+ setTimeout(()=>{
+   el.innerHTML = txt;
+   el.classList.add("show");
+   el.scrollIntoView({behavior:"smooth", block:"center"});
+ },80);
 }
+
+// ВОДА
+function water(){
+ const c1v = parseFloat(document.getElementById('c1').value);
+ const v = parseFloat(document.getElementById('v1').value);
+ const c2v = parseFloat(document.getElementById('c2').value);
+ if(!isFinite(c1v)||!isFinite(v)||!isFinite(c2v) || c1v<=0 || v<=0 || c2v<=0 || c2v>=c1v){
+   show(rWater,'Помилка — перевір вхідні значення');
+   return;
+ }
+ const final = v * c1v / c2v;
+ const add = final - v;
+ show(rWater,
+   'Додати води: <strong>' + add.toFixed(2) + ' л</strong><br>' +
+   'Кінцевий обʼєм: <strong>' + final.toFixed(2) + ' л</strong>'
+ );
+}
+
+// АЕРОМЕТР
+function calcAero(){
+  const measured = parseFloat(document.getElementById('aVal').value);
+  const temp = parseFloat(document.getElementById('tVal').value);
+  const aspType = document.getElementById('aspType').value;
+  const resDiv = document.getElementById('rAero');
+
+  if(isNaN(measured) || isNaN(temp)){
+    show(resDiv,"Помилка — введи показ і температуру");
+    return;
+  }
+
+  let factor = 0.0165; // АСП-3
+  if(aspType === "asp1") factor = 0.015;
+  if(aspType === "asp2") factor = 0.0155;
+  if(aspType === "asp3") factor = 0.0165;
+
+  const corrected = measured * (1 - factor * (temp - 20));
+
+  show(resDiv,
+    "Тип: <b>" + aspType.toUpperCase() + "</b><br>" +
+    "Приведено до 20°C: <b>" + corrected.toFixed(2) + " %</b>"
+  );
+}
+
+// БРАГА
+function braga(){
+ const O = parseFloat(document.getElementById('og').value);
+ const F = parseFloat(document.getElementById('fg').value);
+ const V = parseFloat(document.getElementById('vol').value);
+ if(!isFinite(O) || !isFinite(F) || !isFinite(V) || O<=F || V<=0){
+   show(rBraga,'Помилка — перевір OG, FG та обʼєм (OG > FG)');
+   return;
+ }
+
+ const COEF = 0.5083;
+ const abv = (O - F) * COEF;
+ const absoluteLiters = V * (abv / 100);
+ const raw40 = absoluteLiters / 0.40;
+ const raw43 = absoluteLiters / 0.43;
+
+ show(rBraga,
+   'ABV браги: <strong>' + abv.toFixed(3) + ' %</strong><br>' +
+   'Абсолютний спирт: <strong>' + absoluteLiters.toFixed(2) + ' л</strong><br>' +
+   'Сирець 40%: <strong>' + raw40.toFixed(2) + ' л</strong><br>' +
+   'Сирець 43%: <strong>' + raw43.toFixed(2) + ' л</strong>'
+ );
+}
+
+// Очистити
+function clearAll(){
+ document.querySelectorAll('input').forEach(i=>i.value='');
+ document.querySelectorAll('.result').forEach(r=>{ r.innerHTML=''; r.classList.remove('show'); });
+}
+
+// Theme toggle + persist
+function toggleTheme(){
+ document.body.classList.toggle('light');
+ localStorage.theme = document.body.classList.contains('light') ? 'light' : 'dark';
+}
+if(localStorage.theme === 'light') document.body.classList.add('light');
+
+// Service worker (PWA)
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// PWA Install button
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'inline-block';
+});
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  installBtn.style.display = 'none';
+});
 </script>
+
 </body>
 </html>
