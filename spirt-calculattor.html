@@ -2,216 +2,233 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Alcohol Calculator</title>
-<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Алко калькулятор</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0f14">
+
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;overflow-x:hidden;font-family:system-ui,sans-serif;transition:.3s;}
-:root{
-  --bg:linear-gradient(120deg,#0f2027,#203a43,#2c5364);
-  --card:rgba(0,0,0,0.35);
-  --text:white;
-  --btn:#00c853;
-  --danger:#ff5252;
-  --panel:rgba(255,255,255,0.12);
+html,body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;
+  background:#f2f2f7;color:#000;overflow-x:hidden;
 }
-.light{
-  --bg:linear-gradient(120deg,#e0e0e0,#f5f5f5);
-  --card:white;
-  --text:#000;
-  --panel:#ddd;
+body.dark{background:#0b0f14;color:#f2f2f7}
+.app{max-width:720px;margin:auto;padding:16px}
+
+/* HEADER */
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.title{font-size:26px;font-weight:800}
+.sub{font-size:13px;color:#777}
+body.dark .sub{color:#aaa}
+.switch{
+  border:none;border-radius:18px;padding:8px 14px;
+  background:linear-gradient(135deg,#5ac8fa,#007aff);
+  color:white;font-weight:600
 }
-body{background:var(--bg);color:var(--text);}
-.app{max-width:600px;margin:auto;padding:15px;}
-header{display:flex;justify-content:space-between;align-items:center;font-size:24px;font-weight:700;margin-bottom:10px;flex-wrap:wrap;}
-.theme, #installBtn{padding:6px 12px;border-radius:10px;background:var(--panel);border:none;margin-top:5px;}
-.tabs{display:flex;background:var(--panel);border-radius:12px;overflow:hidden;}
-.tabs button{flex:1;padding:14px;background:none;border:none;font-size:16px;color:var(--text);}
-.tabs button.active{background:var(--card);}
-.panel{display:none;margin-top:15px;}
-.panel.active{display:block;}
-input, select{width:100%;padding:14px;margin:8px 0;border-radius:12px;border:none;font-size:18px;}
-button.calc{width:100%;background:var(--btn);color:white;font-size:18px;padding:14px;border:none;border-radius:12px;margin-top:8px;}
-button.clear{width:100%;background:var(--danger);color:white;font-size:18px;padding:14px;border:none;border-radius:12px;margin-top:8px;}
-.result{opacity:0;transform:scale(.98);transition:.36s;margin-top:12px;background:var(--card);border-radius:12px;padding:15px;font-size:20px;text-align:center;}
-.result.show{opacity:1;transform:scale(1);}
-.small{font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px;}
-@media (max-width:480px){ .app{padding:12px;} input, select{font-size:16px;padding:12px} button.calc,button.clear{padding:12px;font-size:16px} }
+
+/* TABS */
+.tabs{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin-bottom:12px
+}
+.tabs button{
+  background:#fff;border:none;border-radius:14px;
+  padding:12px;font-weight:600;
+  box-shadow:0 4px 10px rgba(0,0,0,.08)
+}
+body.dark .tabs button{background:#1c1c1e;color:#fff}
+.tabs button.active{outline:2px solid #007aff}
+
+/* PANELS */
+.panel{
+  display:none;background:#fff;border-radius:18px;
+  padding:14px;box-shadow:0 8px 18px rgba(0,0,0,.08)
+}
+body.dark .panel{background:#1c1c1e}
+.panel.active{display:block}
+
+/* INPUTS */
+.input{margin:10px 0}
+label{font-size:13px;opacity:.7}
+input,select{
+  width:100%;padding:14px;border-radius:12px;
+  border:1px solid #ccc;background:#fafafa;font-size:17px
+}
+body.dark input,body.dark select{background:#2c2c2e;color:white;border-color:#333}
+
+/* BUTTONS */
+.calc{
+  margin-top:10px;width:100%;padding:14px;
+  border-radius:14px;border:none;
+  font-weight:800;background:#007aff;color:white
+}
+.clear{background:#ff3b30}
+
+/* RESULT */
+.result{
+  margin-top:14px;padding:12px;border-radius:14px;
+  background:#f5f5fa;font-size:15px;
+  line-height:1.7;opacity:0;
+  transform:translateY(6px);transition:.4s
+}
+body.dark .result{background:#2c2c2e}
+.result.show{opacity:1;transform:none}
 </style>
 </head>
 <body>
 
 <div class="app">
+
 <header>
-  Alcohol Calculator
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button class="theme" onclick="toggleTheme()">🌗 Тема</button>
-    <button id="installBtn" style="display:none;">📲 Додати як додаток</button>
+  <div>
+    <div class="title">Алко калькулятор</div>
+    <div class="sub">iOS стиль • офлайн</div>
   </div>
+  <button class="switch" onclick="toggleTheme()">Тема</button>
 </header>
 
 <div class="tabs">
-  <button class="active" onclick="tab(0)">Вода</button>
-  <button onclick="tab(1)">Аерометр</button>
-  <button onclick="tab(2)">Брага</button>
+  <button class="active" onclick="openTab(0)">Вода</button>
+  <button onclick="openTab(1)">Аерометр</button>
+  <button onclick="openTab(2)">Брага</button>
 </div>
 
-<!-- ВОДА -->
+<!-- ========= ВОДА ========= -->
 <div class="panel active">
-  <input type="number" inputmode="decimal" id="c1" placeholder="Початкова міцність %">
-  <input type="number" inputmode="decimal" id="v1" placeholder="Обʼєм л">
-  <input type="number" inputmode="decimal" id="c2" placeholder="Потрібна міцність %">
-  <button class="calc" onclick="water()">Розрахувати</button>
-  <button class="clear" onclick="clearAll()">Очистити</button>
-  <div class="result" id="rWater"></div>
+  <div class="input">
+    <label>Поточна міцність %</label>
+    <input id="w1" type="number" inputmode="decimal">
+  </div>
+  <div class="input">
+    <label>Потрібна міцність %</label>
+    <input id="w2" type="number" inputmode="decimal">
+  </div>
+  <div class="input">
+    <label>Початковий обʼєм (л)</label>
+    <input id="v1" type="number" inputmode="decimal">
+  </div>
+  <button class="calc" onclick="calcWater()">Розрахувати</button>
+  <button class="calc clear" onclick="clearAll()">Очистити</button>
+  <div id="rw" class="result"></div>
 </div>
 
-<!-- АЕРОМЕТР -->
+<!-- ========= АЕРОМЕТР ========= -->
 <div class="panel">
-  <select id="aspType">
-    <option value="asp1">АСП-1</option>
-    <option value="asp2">АСП-2</option>
-    <option value="asp3" selected>АСП-3 (20°C)</option>
-  </select>
-
-  <input type="number" inputmode="decimal" id="aVal" placeholder="Показ аерометра %">
-  <input type="number" inputmode="decimal" id="tVal" placeholder="Температура °C">
-
-  <button class="calc" onclick="calcAero()">Розрахувати</button>
-  <button class="clear" onclick="clearAll()">Очистити</button>
-  <div class="result" id="rAero"></div>
+  <div class="input">
+    <label>Тип аерометра</label>
+    <select>
+      <option>АСП-3</option>
+    </select>
+  </div>
+  <div class="input">
+    <label>Показ спиртометра %</label>
+    <input id="aspv" type="number" inputmode="decimal" oninput="calcAsp()">
+  </div>
+  <div class="input">
+    <label>Температура °C</label>
+    <input id="aspt" type="number" inputmode="decimal" oninput="calcAsp()">
+  </div>
+  <div class="input">
+    <label>Режим розрахунку</label>
+    <select id="mode" onchange="calcAsp()">
+      <option value="real">Реальна</option>
+      <option value="gost">За ГОСТ</option>
+    </select>
+  </div>
+  <button class="calc" onclick="calcAsp()">Розрахувати</button>
+  <button class="calc clear" onclick="clearAll()">Очистити</button>
+  <div id="ra" class="result"></div>
 </div>
 
-<!-- БРАГА -->
+<!-- ========= БРАГА ========= -->
 <div class="panel">
-  <input type="number" inputmode="decimal" id="og" placeholder="OG (АЦ-2)">
-  <input type="number" inputmode="decimal" id="fg" placeholder="FG (АЦ-2)">
-  <input type="number" inputmode="decimal" id="vol" placeholder="Обʼєм браги л">
-  <div class="small">Формула ABV ≈ (OG − FG) × 0.5083</div>
-  <button class="calc" onclick="braga()">Розрахувати</button>
-  <button class="clear" onclick="clearAll()">Очистити</button>
-  <div class="result" id="rBraga"></div>
+  <div class="input">
+    <label>OG (АЦ-2)</label>
+    <input id="og" type="number" inputmode="decimal" oninput="calcBraga()">
+  </div>
+  <div class="input">
+    <label>FG (АЦ-2)</label>
+    <input id="fg" type="number" inputmode="decimal" oninput="calcBraga()">
+  </div>
+  <div class="input">
+    <label>Обʼєм браги (л)</label>
+    <input id="vol" type="number" inputmode="decimal" oninput="calcBraga()">
+  </div>
+  <button class="calc" onclick="calcBraga()">Розрахувати</button>
+  <button class="calc clear" onclick="clearAll()">Очистити</button>
+  <div id="rb" class="result"></div>
 </div>
 
 </div>
 
 <script>
-// Tabs
-function tab(n){
- document.querySelectorAll('.tabs button').forEach((b,i)=>b.classList.toggle("active",i===n));
- document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle("active",i===n));
+// ВКЛАДКИ
+function openTab(i){
+  const panels=document.querySelectorAll(".panel");
+  const Btns=document.querySelectorAll(".tabs button");
+  panels.forEach((p,x)=>p.classList.toggle("active",x===i));
+  Btns.forEach((b,x)=>b.classList.toggle("active",x===i));
 }
 
-// Fade helper
-function show(el, txt){
- el.classList.remove("show");
- setTimeout(()=>{
-   el.innerHTML = txt;
-   el.classList.add("show");
-   el.scrollIntoView({behavior:"smooth", block:"center"});
- },80);
+// ТЕМА
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+}
+
+// ОЧИСТКА
+function clearAll(){
+  document.querySelectorAll("input").forEach(i=>i.value="");
+  document.querySelectorAll(".result").forEach(r=>{r.innerHTML="";r.classList.remove("show")});
 }
 
 // ВОДА
-function water(){
- const c1v = parseFloat(document.getElementById('c1').value);
- const v = parseFloat(document.getElementById('v1').value);
- const c2v = parseFloat(document.getElementById('c2').value);
- if(!isFinite(c1v)||!isFinite(v)||!isFinite(c2v) || c1v<=0 || v<=0 || c2v<=0 || c2v>=c1v){
-   show(rWater,'Помилка — перевір вхідні значення');
-   return;
- }
- const final = v * c1v / c2v;
- const add = final - v;
- show(rWater,
-   'Додати води: <strong>' + add.toFixed(2) + ' л</strong><br>' +
-   'Кінцевий обʼєм: <strong>' + final.toFixed(2) + ' л</strong>'
- );
+function calcWater(){
+  let s1=+w1.value, s2=+w2.value, v=+v1.value;
+  if(!s1||!s2||!v) return;
+  let abs=v*s1/100;
+  let final=abs/(s2/100);
+  let add=final-v;
+  rw.innerHTML=`Додати води: <b>${add.toFixed(2)} л</b><br>Кінцевий обʼєм: <b>${final.toFixed(2)} л</b>`;
+  rw.classList.add("show");
 }
 
 // АЕРОМЕТР
-function calcAero(){
-  const measured = parseFloat(document.getElementById('aVal').value);
-  const temp = parseFloat(document.getElementById('tVal').value);
-  const aspType = document.getElementById('aspType').value;
-  const resDiv = document.getElementById('rAero');
-
-  if(isNaN(measured) || isNaN(temp)){
-    show(resDiv,"Помилка — введи показ і температуру");
-    return;
-  }
-
-  let factor = 0.0165; // АСП-3
-  if(aspType === "asp1") factor = 0.015;
-  if(aspType === "asp2") factor = 0.0155;
-  if(aspType === "asp3") factor = 0.0165;
-
-  const corrected = measured * (1 - factor * (temp - 20));
-
-  show(resDiv,
-    "Тип: <b>" + aspType.toUpperCase() + "</b><br>" +
-    "Приведено до 20°C: <b>" + corrected.toFixed(2) + " %</b>"
-  );
+function calcAsp(){
+  let s=parseFloat(aspv.value);
+  let t=parseFloat(aspt.value);
+  let mode=document.getElementById("mode").value;
+  if(isNaN(s)||isNaN(t)) return;
+  let delta=t-20;
+  let k = (mode==="gost") ? 0.15 : 0.30;
+  let real=s-(delta*k);
+  if(real<0) real=0;
+  if(real>100) real=100;
+  let err=(mode==="gost")?"±0.5%":"польова оцінка";
+  ra.innerHTML=`Результат: <b>${real.toFixed(2)}%</b><br>Похибка: ${err}`;
+  ra.classList.add("show");
 }
 
 // БРАГА
-function braga(){
- const O = parseFloat(document.getElementById('og').value);
- const F = parseFloat(document.getElementById('fg').value);
- const V = parseFloat(document.getElementById('vol').value);
- if(!isFinite(O) || !isFinite(F) || !isFinite(V) || O<=F || V<=0){
-   show(rBraga,'Помилка — перевір OG, FG та обʼєм (OG > FG)');
-   return;
- }
-
- const COEF = 0.5083;
- const abv = (O - F) * COEF;
- const absoluteLiters = V * (abv / 100);
- const raw40 = absoluteLiters / 0.40;
- const raw43 = absoluteLiters / 0.43;
-
- show(rBraga,
-   'ABV браги: <strong>' + abv.toFixed(3) + ' %</strong><br>' +
-   'Абсолютний спирт: <strong>' + absoluteLiters.toFixed(2) + ' л</strong><br>' +
-   'Сирець 40%: <strong>' + raw40.toFixed(2) + ' л</strong><br>' +
-   'Сирець 43%: <strong>' + raw43.toFixed(2) + ' л</strong>'
- );
+function calcBraga(){
+  let ogv=parseFloat(og.value);
+  let fgv=parseFloat(fg.value);
+  let v=parseFloat(vol.value);
+  if(isNaN(ogv)||isNaN(v)) return;
+  if(isNaN(fgv)) fgv=0;
+  let abv=(ogv-fgv)*0.5056;
+  let abs=v*(abv/100);
+  let s40=abs/0.4;
+  let s43=abs/0.43;
+  rb.innerHTML=`
+    ABV браги: <b>${abv.toFixed(3)}%</b><br>
+    Абсолютний спирт: <b>${abs.toFixed(2)} л</b><br>
+    Сирець 40%: <b>${s40.toFixed(2)} л</b><br>
+    Сирець 43%: <b>${s43.toFixed(2)} л</b>
+  `;
+  rb.classList.add("show");
 }
-
-// Очистити
-function clearAll(){
- document.querySelectorAll('input').forEach(i=>i.value='');
- document.querySelectorAll('.result').forEach(r=>{ r.innerHTML=''; r.classList.remove('show'); });
-}
-
-// Theme toggle + persist
-function toggleTheme(){
- document.body.classList.toggle('light');
- localStorage.theme = document.body.classList.contains('light') ? 'light' : 'dark';
-}
-if(localStorage.theme === 'light') document.body.classList.add('light');
-
-// Service worker (PWA)
-if('serviceWorker' in navigator){
- navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-
-// PWA Install button
-let deferredPrompt;
-const installBtn = document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'inline-block';
-});
-installBtn.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  installBtn.style.display = 'none';
-});
 </script>
 
 </body>
